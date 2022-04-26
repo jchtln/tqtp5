@@ -7,7 +7,6 @@
     <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
     <constant name="struts.custom.i18n.resources" value="mesTextes"/>
     <constant name="struts.i18n.encoding" value="UTF-8"/>
-    <bean class="facade.FacadeParisStaticImpl" type="facade.FacadeParis" name="facade" scope="singleton"/>
 
     <package namespace="/" name="default" extends="struts-default">
         <default-action-ref name="index"/>

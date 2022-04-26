@@ -9,17 +9,18 @@ import org.apache.struts2.interceptor.ApplicationAware;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.util.Map;
+import java.util.Objects;
 
-public class Environnement extends ActionSupport implements  SessionAware {
+public class Environnement extends ActionSupport implements  SessionAware, ApplicationAware {
 
     private Map<String, Object> session;
 
     private FacadeParis facade;
 
-    @Inject("facade")
-    public void setFacade(FacadeParis facade){
-        this.facade= facade;
-    }
+//    @Inject("facade")
+//    public void setFacade(FacadeParis facade){
+//        this.facade= facade;
+//    }
 
     public FacadeParis getFacade() {
         return facade;
@@ -43,4 +44,13 @@ public class Environnement extends ActionSupport implements  SessionAware {
         session = map;
     }
 
+    @Override
+    public void setApplication(Map<String, Object> map) {
+    this.facade = (FacadeParis) map.get("facade");
+    if(Objects.isNull(this.facade)){
+        this.facade = new FacadeParisStaticImpl();
+        map.put("facade",this.facade);
+
+    }
+    }
 }
