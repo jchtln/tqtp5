@@ -120,13 +120,15 @@ public class TestParier extends StrutsJUnit4TestCase {
         Pari pari = EasyMock.createMock(Pari.class);
         Match match = EasyMock.createMock(Match.class);
 
-        EasyMock.expect(facadeParis.parier("yohan",idMatch,res,montant)).andReturn(1l);
+        EasyMock.expect(facadeParis.parier("julien",idMatch,res,montant)).andReturn(1l);
+        EasyMock.expect(utilisateur.getLogin()).andReturn("julien");
         EasyMock.expect(pari.getMatch()).andReturn(match);
-        EasyMock.expect(facadeParis.getPari(1l)).andReturn(pari);
         EasyMock.expect(match.getEquipe1()).andReturn("OM");
         EasyMock.expect(match.getEquipe2()).andReturn("PSG");
+
+        EasyMock.expect(facadeParis.getPari(1l)).andReturn(pari);
         EasyMock.expect(facadeParis.getMatch(idMatch)).andReturn(match);
-        EasyMock.expect(utilisateur.getLogin()).andReturn("yohan");
+
         EasyMock.replay(facadeParis, utilisateur, pari,match);
 
         sessions.put("user",utilisateur);
@@ -137,6 +139,48 @@ public class TestParier extends StrutsJUnit4TestCase {
         Parier actionExecutee = (Parier) actionProxy.getAction();
 
         Assert.assertEquals(resultat,"success");
+        Assert.assertTrue(actionExecutee.getPari()==pari);
+
+    }
+
+
+    @Test
+    public void testMontantInfAZero() throws Exception {
+        Double montant = -10d;
+        request.addParameter("montant", String.valueOf(montant));
+        long idmatch = 2;
+        request.addParameter("idMatch", String.valueOf(idmatch));
+        String res="nul";
+        request.addParameter("resultat",res);
+
+        Map<String,Object> sessions = new HashMap<>();
+        Map<String,Object> applications = new HashMap<>();
+
+        ActionProxy actionProxy = getActionProxy("/parier");
+        actionProxy.getInvocation().getInvocationContext().setApplication(applications);
+        actionProxy.getInvocation().getInvocationContext().setSession(sessions);
+        actionProxy.getInvocation().getInvocationContext().setLocale(new Locale("en","EN"));
+
+        Match match = EasyMock.createMock(Match.class);
+        Pari pari = EasyMock.createMock(Pari.class);
+        FacadeParis facadeParis = EasyMock.createMock(FacadeParis.class);
+
+        EasyMock.expect(facadeParis.parier("julien",idmatch,res,montant)).andReturn(101l);
+        EasyMock.expect(pari.getMatch()).andReturn(match);
+        EasyMock.expect(match.getIdMatch()).andReturn(2l);
+        EasyMock.expect(facadeParis.getPari(1l)).andReturn(pari);
+        EasyMock.expect(facadeParis.getMatch(idmatch)).andReturn(match);
+        EasyMock.expect(match.getEquipe1()).andReturn("PSG");
+        EasyMock.expect(match.getEquipe2()).andReturn("Strasbourg");
+        EasyMock.replay(match,pari,facadeParis);
+
+        sessions.put("user","julien");
+        applications.put("facade", facadeParis);
+
+        String resultat = actionProxy.execute();
+
+        Parier actionExecutee = (Parier) actionProxy.getAction();
+        Assert.assertEquals(resultat, "input");
         Assert.assertTrue(actionExecutee.getPari()==pari);
 
     }
